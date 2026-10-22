@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tabăra din pridvorul satului</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,800;1,500&family=Source+Sans+3:wght@400;600;700&display=swap">
+
+  <!-- =====================================================
+       CSS  (mai târziu poate merge într-un fișier style.css)
+       ===================================================== -->
+  <style>
+    /* ---------- Culori și fonturi ---------- */
+    :root {
+      --red: #C8201E;
+      --red-deep: #7A1313;
+      --gold: #F5B700;
+      --blush: #FCEBE6;
+      --ink: #2B1B17;
+      --white: #FFFFFF;
+      --f-display: "Alegreya", Georgia, serif;
+      --f-body: "Source Sans 3", "Segoe UI", Arial, sans-serif;
+      --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+      --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+      --nav-h: 64px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      background: var(--red);
+      color: var(--ink);
+      font-family: var(--f-body);
+      font-size: 18px;
+      line-height: 1.55;
+      overflow: hidden; /* derularea se face în .deck */
+    }
+
+    a { color: inherit; }
+    :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+    /* ---------- Deck: un ecran = un slide ---------- */
+    .deck {
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scroll-snap-type: y proximity;
+      scroll-behavior: smooth;
+    }
+
+    .slide {
+      min-height: 100%;
+      scroll-snap-align: start;
+      display: flex;
+      align-items: center;
+      padding-block: calc(var(--nav-h) + 32px) 88px; /* loc pentru bara de sus */
+      padding-left: var(--gutter-l);
+      padding-right: var(--gutter-r);
+    }
+
+    .inner { width: 100%; max-width: 1080px; margin-inline: auto; min-width: 0; }
+
+    .s-red   { background: var(--red);      color: var(--white); }
+    .s-deep  { background: var(--red-deep); color: var(--white); }
+    .s-blush { background: var(--blush);    color: var(--ink); }
+
+    /* ---------- Text ---------- */
+    .label {
+      font-weight: 700; font-size: 13px; letter-spacing: .14em; text-transform: uppercase;
+      margin: 0 0 18px; color: var(--red);
+    }
+    .s-red .label, .s-deep .label { color: var(--gold); }
+
+    h1, h2 {
+      font-family: var(--f-display); font-weight: 800; line-height: 1.05;
+      margin: 0 0 24px; text-wrap: balance;
+    }
+    h1 { font-size: clamp(42px, 8vw, 92px); }
+    h2 { font-size: clamp(32px, 5vw, 56px); }
+    h3 { font-family: var(--f-display); font-size: 24px; margin: 0 0 6px; }
+    p  { margin: 0 0 16px; max-width: 62ch; }
+    .lead { font-size: clamp(19px, 2.2vw, 24px); }
+
+    /* ---------- Bara de sus (nav) ---------- */
+    /* Fundal alb, text roșu: se vede bine pe toate culorile slide-urilor */
+    .site-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: calc(var(--nav-h) + env(safe-area-inset-top, 0px));
+      padding: env(safe-area-inset-top, 0px) var(--gutter-r) 0 var(--gutter-l);
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--white);
+      border-bottom: 3px solid var(--gold);
+      transition: background .3s ease, border-color .3s ease;
+    }
+    .site-nav :focus-visible { outline-color: var(--red); }
+
+    .logo-link {
+      position: relative; z-index: 2;
+      font-family: var(--f-display); font-weight: 800; font-size: 19px;
+      color: var(--red); text-decoration: none;
+      transition: color .3s ease;
+    }
+
+    .menu a {
+      color: var(--red-deep); text-decoration: none; font-weight: 600;
+    }
+    .menu a:hover { color: var(--red); }
+
+    /* Butonul burger (apare doar pe ecrane mici) */
+    .burger {
+      position: relative; z-index: 2;
+      width: 36px; height: 24px; padding: 0;
+      background: none; border: 0; cursor: pointer;
+    }
+    .burger span {
+      position: absolute; left: 0; top: 11px; width: 100%; height: 2px;
+      background: var(--red-deep);
+      transition: transform .35s cubic-bezier(.65, 0, .35, 1), opacity .2s ease, background .3s ease;
+    }
+    .burger span:nth-child(1) { transform: translateY(-9px); }
+    .burger span:nth-child(3) { transform: translateY(9px); }
+
+    /* Meniu mobil deschis: fundal roșu închis, text alb, accente aurii */
+    .site-nav.menu-open { background: transparent; border-bottom-color: transparent; }
+    .site-nav.menu-open .logo-link { color: var(--white); }
+    .site-nav.menu-open .burger span { background: var(--gold); }
+    .site-nav.menu-open .burger span:nth-child(1) { transform: rotate(45deg); }
+    .site-nav.menu-open .burger span:nth-child(2) { opacity: 0; }
+    .site-nav.menu-open .burger span:nth-child(3) { transform: rotate(-45deg); }
+
+    /* Meniu pe telefon: ecran întreg */
+    .menu {
+      position: fixed; inset: 0; z-index: 1;
+      display: flex; flex-direction: column; justify-content: center; gap: 22px;
+      padding: 0 var(--gutter-r) 0 var(--gutter-l);
+      background: var(--red-deep);
+      opacity: 0; visibility: hidden;
+      transition: opacity .3s ease, visibility .3s ease;
+    }
+    .menu.open { opacity: 1; visibility: visible; }
+
+    .menu a {
+      color: var(--white);
+      font-family: var(--f-display); font-weight: 800; font-size: 2rem;
+      opacity: 0; transform: translateY(16px);
+      transition: opacity .4s ease, transform .4s ease, color .2s ease;
+    }
+    .menu a:hover { color: var(--gold); }
+    .menu.open a { opacity: 1; transform: none; }
+    .menu.open a:nth-child(1) { transition-delay: .10s; }
+    .menu.open a:nth-child(2) { transition-delay: .17s; }
+    .menu.open a:nth-child(3) { transition-delay: .24s; }
+    .menu.open a:nth-child(4) { transition-delay: .31s; }
+    .menu.open a:nth-child(5) { transition-delay: .38s; }
+    .menu.open a:nth-child(6) { transition-delay: .45s; }
+    .menu.open a:nth-child(7) { transition-delay: .52s; }
+    .menu.open a:nth-child(8) { transition-delay: .59s; }
+
+    /* Linia care apare sub linkuri */
+    .menu-line {
+      width: 100%; height: 1px; border: 0; margin: 10px 0 0;
+      background: rgba(245, 183, 0, .5);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform .6s cubic-bezier(.65, 0, .35, 1);
+    }
+    .menu.open .menu-line { transform: scaleX(1); transition-delay: .6s; }
+
+    /* Desktop: linkurile stau pe o linie în bară */
+    @media (min-width: 900px) {
+      .burger { display: none; }
+      .menu {
+        position: static; background: none; padding: 0;
+        flex-direction: row; gap: 28px;
+        opacity: 1; visibility: visible;
+      }
+      .menu a { font-family: var(--f-body); font-size: 16px; font-weight: 600; opacity: 1; transform: none; color: var(--red-deep); transition-delay: 0s !important; }
+      .menu a:hover { color: var(--red); }
+      .menu-line { display: none; }
+    }
+
+    /* ---------- Logo (pe fundal alb ca să se vadă bine) ---------- */
+    .logo-card {
+      background: var(--white);
+      border-radius: 28px;
+      padding: 16px;
+      width: 100%; max-width: 380px; justify-self: center;
+      box-shadow: 0 6px 0 rgba(122, 19, 19, .35);
+    }
+    .logo-card img { display: block; width: 100%; height: auto; }
+
+    /* ---------- Slide 1: Acasă ---------- */
+    .hero { display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; align-items: center; }
+    .tagline {
+      font-family: var(--f-display); font-style: italic; font-weight: 500;
+      font-size: clamp(24px, 3.2vw, 36px); color: var(--gold); margin: 0 0 28px;
+    }
+    .meta { display: flex; flex-wrap: wrap; gap: 8px 24px; font-weight: 600; }
+    .meta span { white-space: nowrap; }
+
+    /* ---------- Slide 2: Proiectul ---------- */
+    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+    .facts { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+    .facts li { background: var(--white); border-radius: 14px; padding: 16px 20px; box-shadow: 0 2px 0 rgba(122, 19, 19, .12); }
+    .facts b { display: block; font-family: var(--f-display); font-size: 22px; color: var(--red); }
+
+    /* ---------- Slide 3: Cifre ---------- */
+    .chart { display: grid; gap: 22px; margin: 8px 0 28px; }
+    .bar-row { display: grid; grid-template-columns: 120px 1fr; gap: 16px; align-items: center; }
+    .bar-row .yr { font-weight: 700; font-size: 15px; line-height: 1.25; }
+    .track { background: rgba(255, 255, 255, .14); border-radius: 10px; height: 52px; min-width: 0; }
+    .fill {
+      height: 100%; border-radius: 10px; background: var(--gold); color: var(--red-deep);
+      display: flex; align-items: center; justify-content: flex-end; padding-right: 14px;
+      font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap;
+    }
+    .fill.target { background: var(--white); }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .stat { border: 2px solid rgba(255, 255, 255, .28); border-radius: 14px; padding: 16px 18px; }
+    .stat b { display: block; font-family: var(--f-display); font-size: 40px; line-height: 1.05; color: var(--gold); font-variant-numeric: tabular-nums; }
+    .stat span { font-size: 15px; }
+
+    /* ---------- Slide 4: Programul ---------- */
+    .days { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 8px; }
+    .day { background: var(--white); border-radius: 16px; padding: 22px; }
+    .day h3 { color: var(--red); }
+    .day p { margin: 0; font-size: 17px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+    .chip { background: var(--red); color: var(--white); border-radius: 999px; padding: 6px 16px; font-weight: 600; font-size: 15px; }
+    .chip.alt { background: var(--gold); color: var(--red-deep); }
+
+    /* ---------- Slide 5: Povestea ---------- */
+    .quote {
+      font-family: var(--f-display); font-style: italic; font-weight: 500;
+      font-size: clamp(34px, 6vw, 68px); line-height: 1.1; color: var(--gold);
+      margin: 0 0 28px; max-width: 18ch; text-wrap: balance;
+    }
+    .story { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: end; }
+
+    /* ---------- Slide 6: Voluntarii ---------- */
+    .who { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+    .who div { background: var(--white); border-radius: 16px; padding: 22px; }
+    .who b { font-family: var(--f-display); font-size: 40px; color: var(--red); display: block; line-height: 1.05; font-variant-numeric: tabular-nums; }
+    .who h3 { color: var(--ink); font-size: 21px; margin-top: 8px; }
+    .who p { margin: 0; font-size: 16px; }
+
+    /* ---------- Slide 7: Donații ---------- */
+    .give { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+    .price { font-family: var(--f-display); font-weight: 800; font-size: clamp(64px, 12vw, 140px); line-height: 1; color: var(--gold); font-variant-numeric: tabular-nums; }
+    .price small { font-size: .3em; font-weight: 500; color: var(--white); }
+    .btns { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+    .btn { display: inline-block; text-decoration: none; font-weight: 700; padding: 14px 24px; border-radius: 12px; background: var(--gold); color: var(--red-deep); }
+    .btn:hover { filter: brightness(1.06); }
+
+    /* ---------- Slide 8: Contact ---------- */
+    .end .logo-card { max-width: 200px; margin: 0 0 24px; justify-self: start; }
+    .links { display: flex; flex-wrap: wrap; gap: 12px 28px; margin-top: 12px; font-weight: 600; }
+
+    /* ---------- Buton „înapoi sus” ---------- */
+    .to-top {
+      position: fixed; z-index: 50;
+      right: var(--gutter-r);
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+      width: 48px; height: 48px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--gold); color: var(--red-deep);
+      font-size: 22px; font-weight: 700; text-decoration: none; line-height: 1;
+      box-shadow: 0 3px 0 rgba(0, 0, 0, .25);
+      opacity: 0; visibility: hidden; transform: translateY(8px);
+      transition: opacity .3s ease, transform .3s ease, visibility .3s;
+    }
+    .to-top.show { opacity: 1; visibility: visible; transform: none; }
+    .to-top:hover { filter: brightness(1.06); }
+
+    /* ---------- Ecrane mici ---------- */
+    @media (max-width: 760px) {
+      body { font-size: 17px; }
+      .slide { padding-block: calc(var(--nav-h) + 24px) 96px; }
+      .hero, .cols, .story, .give { grid-template-columns: 1fr; gap: 28px; }
+      .logo-card { max-width: 240px; justify-self: start; }
+      .stats { grid-template-columns: 1fr; }
+      .bar-row { grid-template-columns: 1fr; gap: 6px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .deck { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =====================================================
+       BARA DE SUS + MENIU
+       ===================================================== -->
+  <header class="site-nav" id="site-nav">
+    <!-- Logo-ul din stânga: duce sus, la secțiunea Acasă -->
+    <a class="logo-link" href="#acasa">Tabăra din pridvorul satului</a>
+
+    <button class="burger" id="burger" type="button" aria-label="Meniu" aria-expanded="false" aria-controls="menu">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="menu" id="menu">
+      <a href="#acasa">Acasă</a>
+      <a href="#proiect">Proiect</a>
+      <a href="#cifre">Cifre</a>
+      <a href="#program">Program</a>
+      <a href="#poveste">Povestea</a>
+      <a href="#voluntarii">Voluntarii</a>
+      <a href="#donatii">Donații</a>
+      <a href="#contact">Contact</a>
+      <hr class="menu-line">
+    </nav>
+  </header>
+
+  <!-- Butonul din dreapta jos: apare după primul slide și te duce înapoi la Acasă -->
+  <a class="to-top" id="to-top" href="#acasa" aria-label="Înapoi sus">&#8593;</a>
+
+
+  <!-- =====================================================
+       CONȚINUT (slide-uri)
+       ===================================================== -->
+  <main class="deck" id="deck">
+
+    <!-- 1. Acasă -->
+    <section class="slide s-red" id="acasa">
+      <div class="inner hero">
+        <div>
+          <p class="label">Arhiepiscopia Iașilor · din 2012</p>
+          <h1>Tabăra din pridvorul satului</h1>
+          <p class="tagline">Niciun copil fără vacanță</p>
+          <div class="meta">
+            <span>Vara 2026</span>
+            <span>Iași · Botoșani · Neamț</span>
+            <span>1 iulie – 10 septembrie</span>
+          </div>
+        </div>
+        <!-- Pune fișierul logo.png în același folder cu pagina -->
+        <div class="logo-card">
+          <img src="logo tps transparent.png" alt="Logo Tabăra din pridvorul satului" width="440" height="440">
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Proiectul -->
+    <section class="slide s-blush" id="proiect">
+      <div class="inner cols">
+        <div>
+          <p class="label">Proiectul</p>
+          <h2>O tabără chiar în curtea bisericii din sat</h2>
+          <p class="lead">Copiii din comunități rurale vulnerabile sau izolate primesc trei zile de tabără în satul lor, fără să plece de acasă. Voluntarii vin la ei, cu rugăciune, jocuri și ateliere.</p>
+          <p>Proiectul este organizat de Departamentul Misiune pentru Tineret al Arhiepiscopiei Iașilor și coordonat de Pr. Mihail Siminciuc.</p>
+        </div>
+        <ul class="facts">
+          <li><b>3 zile</b>pentru fiecare tabără</li>
+          <li><b>În satul copiilor</b>în curtea bisericii, cu sprijinul comunității parohiale</li>
+          <li><b>Cost redus</b>voluntarii fac posibilă tabăra; mai trebuie doar materialele</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 3. Cifre -->
+    <section class="slide s-deep" id="cifre">
+      <div class="inner">
+        <p class="label">Cifre</p>
+        <h2>De la 10.000 de copii în 2023 la o țintă de 15.000 în 2026</h2>
+
+        <!-- Lățimea barelor = valoarea / 15.000 -->
+        <div class="chart" role="img" aria-label="Copii participanți: 2023 peste 10.000, 2025 aproximativ 13.000, 2026 țintă 15.000">
+          <div class="bar-row"><div class="yr">2023</div><div class="track"><div class="fill" style="width:66.7%">peste 10.000</div></div></div>
+          <div class="bar-row"><div class="yr">2025</div><div class="track"><div class="fill" style="width:86.7%">aprox. 13.000</div></div></div>
+          <div class="bar-row"><div class="yr">2026<br>țintă</div><div class="track"><div class="fill target" style="width:100%">15.000</div></div></div>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><b>120+</b><span>tabere organizate în 2025</span></div>
+          <div class="stat"><b>~400</b><span>voluntari necesari în 2026, față de 300 în 2025</span></div>
+          <div class="stat"><b>3</b><span>județe: Iași, Botoșani și Neamț</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Programul -->
+    <section class="slide s-blush" id="program">
+      <div class="inner">
+        <p class="label">Programul</p>
+        <h2>Ce se întâmplă în trei zile</h2>
+        <div class="days">
+          <div class="day"><h3>Rugăciune</h3><p>Fiecare tabără include momente de rugăciune, trăite împreună cu preotul și voluntarii.</p></div>
+          <div class="day"><h3>Joacă și mișcare</h3><p>Jocuri de energizare, dansuri, concursuri, drumeții și vânătoare de comori.</p></div>
+          <div class="day"><h3>Ateliere</h3><p>Activități creative și educative, iar copiii pregătesc și un moment artistic pentru comunitate.</p></div>
+          <div class="day"><h3>Întreabă preotul</h3><p>Un moment în care copiii vorbesc liber despre ce îi preocupă.</p></div>
+        </div>
+        <div class="chips">
+          <span class="chip">Foc de tabără</span>
+          <span class="chip alt">Educație ecologică</span>
+          <span class="chip">Primul ajutor</span>
+          <span class="chip alt">Spovedanie pentru cei care doresc</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Povestea -->
+    <section class="slide s-red" id="poveste">
+      <div class="inner story">
+        <div>
+          <p class="label">De ce contează</p>
+          <p class="quote">Pentru această steluță contează.</p>
+        </div>
+        <div>
+          <p class="lead">După reflux, un copil arunca înapoi în apă steluțele de mare rămase pe nisip. Cuiva care i-a spus că nu poate schimba nimic, i-a arătat că pentru fiecare steluță salvată gestul contează.</p>
+          <p>Tinerii sunt steluțele. Tabăra nu salvează lumea, dar schimbă vieți.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Voluntarii -->
+    <section class="slide s-blush" id="voluntarii">
+      <div class="inner">
+        <p class="label">Oamenii din spatele taberelor</p>
+        <h2>Tineri care devin model pentru copii</h2>
+        <div class="who">
+          <div><b>~400</b><h3>Voluntari în 2026</h3><p>Studenți și tineri din eparhie, care pleacă în sate și rămân alături de copii trei zile.</p></div>
+          <div><b>3</b><h3>Asociații de tineret</h3><p>ASCOR, ATOR și Asociația Prietenii Sfinților Trei Ierarhi trimit voluntari în tabere.</p></div>
+          <div><b>Parohii</b><h3>Preoți și comunități</h3><p>Fiecare tabără ține de parohia care deschide pridvorul bisericii.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Donații -->
+    <section class="slide s-deep" id="donatii">
+      <div class="inner give">
+        <div>
+          <p class="label">Susține tabăra</p>
+          <div class="price">30 <small>lei / copil</small></div>
+          <p class="lead">Atât costă materialele pentru activitățile unui copil. Pentru toți cei 15.000, bugetul este de 450.000 de lei.</p>
+        </div>
+        <div>
+          <h2>Fii alături de copiii din sate</h2>
+          <p>Donează online, cu mențiunea „TABARA”, sau prin transfer în contul Arhiepiscopiei Iașilor.</p>
+          <div class="btns">
+            <!-- De înlocuit cu linkul real de donație -->
+            <a class="btn" href="/" target="_blank" rel="noopener">Donează</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. Contact -->
+    <section class="slide s-red" id="contact">
+      <div class="inner end">
+        <div class="logo-card">
+          <img src="logo tps transparent.png" alt="Logo Tabăra din pridvorul satului" width="440" height="440">
+        </div>
+        <h1>Împreună pentru tineri</h1>
+        <p class="tagline">Niciun copil fără vacanță</p>
+        <p class="lead">Departamentul Misiune pentru Tineret · Arhiepiscopia Iașilor</p>
+        <div class="links">
+          <a href="https://www.facebook.com/tabaradinpridvorulsatului/" target="_blank" rel="noopener">Facebook</a>
+          <a href="https://doxologia.ro/search/google?keys=tabara+din+pridvorul+satului" target="_blank" rel="noopener">Articole pe Doxologia</a>
+          <a href="https://basilica.ro/tabara-din-pridvorul-satului-2026-vacanta-memorabila-15000-copii-zona-rurala/" target="_blank" rel="noopener">Despre sezonul 2026</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- =====================================================
+       JAVASCRIPT  (mai târziu poate merge într-un fișier script.js)
+       ===================================================== -->
+  <script>
+    var nav    = document.getElementById('site-nav');
+    var burger = document.getElementById('burger');
+    var menu   = document.getElementById('menu');
+    var toTop  = document.getElementById('to-top');
+    var deck   = document.getElementById('deck');
+    var home   = document.getElementById('acasa');
+
+    /* ----- Meniul de pe telefon: deschis / închis ----- */
+    function setMenu(open) {
+      burger.setAttribute('aria-expanded', open);
+      menu.classList.toggle('open', open);
+      nav.classList.toggle('menu-open', open);
+    }
+
+    burger.addEventListener('click', function () {
+      setMenu(burger.getAttribute('aria-expanded') !== 'true');
+    });
+
+    // După ce alegi o secțiune, meniul se închide
+    menu.querySelectorAll('a').forEach(function (link) {
+      link.addEventListener('click', function () { setMenu(false); });
+    });
+
+    // Escape închide meniul; la trecerea pe ecran mare se resetează
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') setMenu(false);
+    });
+    window.addEventListener('resize', function () {
+      if (window.innerWidth >= 900) setMenu(false);
+    });
+
+    /* ----- Butonul „înapoi sus”: ascuns cât timp ești pe Acasă ----- */
+    new IntersectionObserver(function (entries) {
+      toTop.classList.toggle('show', !entries[0].isIntersecting);
+    }, { root: deck, threshold: 0.55 }).observe(home);
+  </script>
+
+</body>
+</html>
